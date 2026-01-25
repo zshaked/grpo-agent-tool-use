@@ -1,0 +1,17 @@
+# Python
+__pycache__/
+*.py[cod]
+*.class
+*.so
+.Python
+env/
+venv/
+
+# Model files (too large for GitHub)
+grpo_model/
+*.bin
+*.pt
+*.pth
+
+# OS
+.DS_Store
