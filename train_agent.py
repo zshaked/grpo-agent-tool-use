@@ -6,19 +6,26 @@ from utils import extract_answer, generate_with_log_probs, compute_advantages
 
 def compute_tool_use_rewards(responses, correct_answer):
     """
-    Your reward logic here.
+    Reward both tool use AND correctness.
     
-    Think through:
-    - How to check if tool was used
-    - How to check correctness
-    - What reward for each combination
+    Reward scheme:
+    - calculator( + correct: 1.0
+    - calculator( + wrong: 0.3
+    - no calculator + correct: 0.5
+    - no calculator + wrong: 0.0
     """
     rewards = []
 
     for response in responses:
-        used_calculator = "calculator" in response.lower()
+        # Get only the generated part (after "A:")
+        answer_part = response.split("A:")[-1] if "A:" in response else response
+        
+        # Check for actual calculator usage (with parentheses)
+        used_calculator = "calculator(" in answer_part.lower()
+        
         answer = extract_answer(response)
         correct = (answer == correct_answer)
+        
         if correct and used_calculator:
             rewards.append(1.0)
         elif not correct and used_calculator:
@@ -29,7 +36,6 @@ def compute_tool_use_rewards(responses, correct_answer):
             rewards.append(0.0)
 
     return np.array(rewards)
-
 
 
 def train_agent_grpo(model, tokenizer, problems, num_epochs=3, k=3, lr=5e-5):
@@ -74,9 +80,11 @@ def train_agent_grpo(model, tokenizer, problems, num_epochs=3, k=3, lr=5e-5):
             
             # Track stats
             for response in responses:
+                answer_part = response.split("A:")[-1] if "A:" in response else response
+                
                 if extract_answer(response) == correct_answer:
                     epoch_correct += 1
-                if "calculator" in response.lower():
+                if "calculator(" in answer_part.lower():
                     epoch_tool_use += 1
             epoch_total += len(responses)
             
