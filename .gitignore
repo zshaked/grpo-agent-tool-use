@@ -13,5 +13,8 @@ grpo_model/
 *.pt
 *.pth
 
+# Virtual environments
+.venv/
+
 # OS
 .DS_Store

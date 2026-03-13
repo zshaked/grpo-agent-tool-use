@@ -1,33 +1,45 @@
-# GRPO for Agent Tool Use
+# Agent Memory Management
 
-Applying Group Relative Policy Optimization (GRPO) to teach agents when to use tools.
+A lightweight memory management system for AI agents, providing key-value storage with persistence, prefix-based search, and LRU eviction.
 
-## Overview
+## Features
 
-This project demonstrates how GRPO can train agents to:
-1. Recognize when a tool is needed
-2. Invoke the tool appropriately
-3. Produce correct answers
+- **Key-value memory store** with typed entries
+- **Persistence** to JSON files
+- **Prefix search** for organized memory namespaces
+- **LRU eviction** when max capacity is reached
+- **Serialization** with `to_dict` / `from_dict` round-tripping
 
-## What is GRPO?
+## Installation
 
-GRPO improves on standard policy gradient by comparing responses within a group:
-
-1. Generate K responses to the same prompt
-2. Score each response (tool use + correctness)
-3. Compute advantage = reward - group_mean
-4. Update model: increase probability of above-average responses
-
-## Reward Design
-
-| Scenario | Reward |
-|----------|--------|
-| Used calculator + correct | 1.0 |
-| Used calculator + wrong | 0.3 |
-| No calculator + correct | 0.5 |
-| No calculator + wrong | 0.0 |
-
-This reward shaping encourages tool use as the preferred strategy.
-
-## Usage
 ```bash
+pip install -e ".[dev]"
+```
+
+## Quick Start
+
+```python
+from agent_memory import MemoryStore
+
+store = MemoryStore(persist_path="agent_memory.json", max_entries=5000)
+
+# Store memories
+store.put("user:name", "Alice", metadata={"source": "onboarding"})
+store.put("task:current", {"goal": "summarize document", "status": "in_progress"})
+
+# Retrieve
+entry = store.get("user:name")
+print(entry.content)  # "Alice"
+
+# Search by prefix
+user_memories = store.search("user:")
+
+# Persist to disk
+store.save()
+```
+
+## Running Tests
+
+```bash
+pytest
+```
