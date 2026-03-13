@@ -13,6 +13,9 @@ grpo_model/
 *.pt
 *.pth
 
+# Build artifacts
+*.egg-info/
+
 # Virtual environments
 .venv/
 
